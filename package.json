@@ -12,18 +12,21 @@
   },
   "description": "Pure JWT implementation using Redis as session storage for Koa 2, without any cookies",
   "devDependencies": {
-    "koa": "*",
+    "koa": "^2.0.0",
+    "koa-convert": "*",
+    "koa-bodyparser": "^3.0.0",
     "mocha": "*",
     "should": "*",
     "supertest": "*",
+    "supertest-koa-agent": "*",
     "debug": "*",
-    "babel-node": "*",
     "babel-cli": "*",
     "babel-core": "*",
     "babel-loader": "*",
     "babel-polyfill": "*",
     "babel-preset-es2015": "*",
     "babel-preset-es2016-node5": "*",
+    "babel-preset-stage-0": "*"
   },
   "directories": {},
   "files": [
@@ -36,7 +39,9 @@
     "jwt",
     "redis",
     "session",
-    "Non-cookie"
+    "non-cookie",
+    "es6",
+    "es7"
   ],
   "license": "MIT",
   "maintainers": [
@@ -52,7 +57,7 @@
     "url": "git@github.com:lyalls/koa-jwt-redis-session.git"
   },
   "scripts": {
-    "test": "babel-node --presets es2015,es2016-node5 test.js"
+    "test": "mocha --compilers js:babel-core/register test.js"
   },
   "version": "0.0.1"
 }

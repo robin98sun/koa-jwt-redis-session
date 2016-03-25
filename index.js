@@ -15,6 +15,8 @@ function middleware(opts) {
     const options = opts || {}
     // JWT Options
     const jwtOptions = options.jwt || {}
+    const contentType = jwtOptions.contentType || 'application/json'
+    const charset = jwtOptions.charset || 'utf-8'
     const secret = jwtOptions.secret || 'koa-jwt-redis-session' + new Date().getTime()
     const authPath = jwtOptions.authPath || '/authorize';
     const registerPath = jwtOptions.registerPath || '/register';
@@ -38,23 +40,32 @@ function middleware(opts) {
     const redisStore = new RedisStore(redisOptions);
     const store = redisStore;
 
+    // Utilities
+    function sendToken(ctx, token){
+        if(contentType.toLowerCase() === 'application/json')
+            ctx.body = {token};
+        else ctx.body = token;
+    }
+
     // Authorization by JWT
     return async function (ctx, next) {
         try {
-
+            ctx.type = contentType + ';' + 'charset=' + charset;
             // SignIn
             if (ctx.path === authPath && ctx.method.toUpperCase() === 'POST'
                 && ctx.request.body[accountKey] && ctx.request.body[passwordKey]
             ) {
                 const account = ctx.request.body[accountKey] ;
                 const password = ctx.request.body[passwordKey];
-
+                debug('checking authorization:', account, password);
                 if(await authHandler(account, password)){
                     let user = {};
                     user[accountKey] = account;
                     user[passwordKey] = password;
                     ctx[sessionKey] = await Session.create(store, user, sessOpt);
-                    ctx.body = await JWT.sign(user,secret,jwtOpt)
+                    const token = await JWT.sign(user,secret,jwtOpt)
+                    debug('Generated token:', token)
+                    sendToken(ctx, token);
                 }else{
                     ctx.throw(401, 'Authorization failed');
                 }
@@ -70,7 +81,9 @@ function middleware(opts) {
                     user[accountKey] = account;
                     user[passwordKey] = password;
                     ctx[sessionKey] = await Session.create(store, user, sessOpt);
-                    ctx.body = await JWT.sign(user,secret,jwtOpt)
+                    const token = await JWT.sign(user,secret,jwtOpt)
+                    debug('Generated token:', token)
+                    sendToken(ctx, token);
                 }else{
                     ctx.throw(401, 'Register failed')
                 }
@@ -182,8 +195,9 @@ class Session {
         let options = opts || {
                 sidKey: 'sid'
             }
-        debug('Creating or reloading sessinId:', instance[options.sidKey])
+
         if(!instance[options.sidKey]) {
+            debug('Creating session')
             // Creating
             let sid = Session.generateSessionId();
             while (await store.exists(sid)){
@@ -198,6 +212,7 @@ class Session {
             await session.save(store);
             return session;
         }else{
+            debug('Loading session, sid:',instance[options.sidKey])
             // loading
             instance = await store.get(instance[options.sidKey]);
             instance._sessionId = instance[options.sidKey];
