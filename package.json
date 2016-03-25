@@ -30,7 +30,11 @@
   },
   "directories": {},
   "files": [
-    "index.js"
+    "index.js",
+    "./lib/index.js",
+    "./lib/test.js",
+    "./src/index.js",
+    "./src/test.js"
   ],
   "homepage": "https://github.com/lyalls/koa-jwt-redis-session",
   "keywords": [
@@ -57,10 +61,10 @@
     "url": "git@github.com:lyalls/koa-jwt-redis-session.git"
   },
   "scripts": {
-    "test": "mocha --compilers js:babel-core/register test.js",
-    "test-prod": "mocha ./lib/test.js",
+    "test-dev": "mocha --compilers js:babel-core/register ./srctest.js",
+    "test": "mocha ./lib/test.js",
     "build": "babel --presets es2015,es2016-node5 --out-dir ./lib ./src"
   },
-  "version": "0.0.2"
+  "version": "0.0.3"
 }
 
