@@ -59,10 +59,10 @@
     "url": "git@github.com:lyalls/koa-jwt-redis-session.git"
   },
   "scripts": {
-    "test-dev": "mocha --compilers js:babel-core/register ./srctest.js",
+    "test-dev": "mocha --compilers js:babel-core/register ./src/test.js",
     "test": "mocha ./lib/test.js",
     "build": "babel --presets es2015,es2016-node5 --out-dir ./lib ./src"
   },
-  "version": "0.0.4"
+  "version": "0.0.5"
 }
 
