@@ -20,13 +20,13 @@
     "supertest": "*",
     "supertest-koa-agent": "*",
     "debug": "*",
+    "babel": "*",
     "babel-cli": "*",
     "babel-core": "*",
     "babel-loader": "*",
     "babel-polyfill": "*",
     "babel-preset-es2015": "*",
-    "babel-preset-es2016-node5": "*",
-    "babel-preset-stage-0": "*"
+    "babel-preset-es2016-node5": "*"
   },
   "directories": {},
   "files": [
@@ -57,8 +57,10 @@
     "url": "git@github.com:lyalls/koa-jwt-redis-session.git"
   },
   "scripts": {
-    "test": "mocha --compilers js:babel-core/register test.js"
+    "test": "mocha --compilers js:babel-core/register test.js",
+    "test-prod": "mocha ./lib/test.js",
+    "build": "babel --presets es2015,es2016-node5 --out-dir ./lib ./src"
   },
-  "version": "0.0.1"
+  "version": "0.0.2"
 }
 
