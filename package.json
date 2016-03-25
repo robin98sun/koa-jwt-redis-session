@@ -31,10 +31,8 @@
   "directories": {},
   "files": [
     "index.js",
-    "./lib/index.js",
-    "./lib/test.js",
-    "./src/index.js",
-    "./src/test.js"
+    "lib",
+    "src"
   ],
   "homepage": "https://github.com/lyalls/koa-jwt-redis-session",
   "keywords": [
@@ -65,6 +63,6 @@
     "test": "mocha ./lib/test.js",
     "build": "babel --presets es2015,es2016-node5 --out-dir ./lib ./src"
   },
-  "version": "0.0.3"
+  "version": "0.0.4"
 }
 
