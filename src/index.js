@@ -24,11 +24,23 @@ function middleware(opts) {
     const accountKey = jwtOptions.accountKey || 'account';
     const passwordKey = jwtOptions.passwordKey || 'password';
     const authHandler = jwtOptions.authHandler || function (account, password) {
-            if (account && password) return true; else return false;
-        }
+				if (account && password) {
+					let user = {};
+					user[accountKey] = account;
+					user[passwordKey] = password;
+					return user;
+				}
+				return false;
+		}
     const registerHandler = jwtOptions.registerHandler || function (account, password) {
-            if (account && password) return true; else return false;
-        }
+				if (account && password) {
+					let user = {};
+					user[accountKey] = account;
+					user[passwordKey] = password;
+					return user;
+				}
+				return false;
+    }
     const jwtOpt = {expiresIn};
     // Session
     const sessionOptions = options.session || {}
@@ -55,13 +67,13 @@ function middleware(opts) {
             if (ctx.path === authPath && ctx.method.toUpperCase() === 'POST'
                 && ctx.request.body[accountKey] && ctx.request.body[passwordKey]
             ) {
-                const account = ctx.request.body[accountKey] ;
+                const account = ctx.request.body[accountKey];
                 const password = ctx.request.body[passwordKey];
                 debug('checking authorization:', account, password);
-                if(await authHandler(account, password)){
-                    let user = {};
-                    user[accountKey] = account;
-                    user[passwordKey] = password;
+                let user = await authHandler(account, password);
+                if(typeof(user) == "object" 
+                  && Object.prototype.toString.call(user).toLowerCase() == "[object object]" 
+                  && !user.length){
                     ctx[sessionKey] = await Session.create(store, user, sessOpt);
                     const token = await JWT.sign(user,secret,jwtOpt)
                     debug('Generated token:', token)
@@ -73,13 +85,13 @@ function middleware(opts) {
             } else if (ctx.path === registerPath && ctx.method.toUpperCase() === 'POST'
                 && ctx.request.body[accountKey] && ctx.request.body[passwordKey]
             ) {
-                const account = ctx.request.body[accountKey] ;
+                const account = ctx.request.body[accountKey];
                 const password = ctx.request.body[passwordKey];
 
-                if(await registerHandler(account, password)){
-                    let user = {};
-                    user[accountKey] = account;
-                    user[passwordKey] = password;
+                let user = await registerHandler(account, password);
+                if( typeof(user) == "object" 
+                  && Object.prototype.toString.call(user).toLowerCase() == "[object object]" 
+                  && !user.length){
                     ctx[sessionKey] = await Session.create(store, user, sessOpt);
                     const token = await JWT.sign(user,secret,jwtOpt)
                     debug('Generated token:', token)
