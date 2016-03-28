@@ -71,8 +71,8 @@ function middleware(opts) {
                 const password = ctx.request.body[passwordKey];
                 debug('checking authorization:', account, password);
                 let user = await authHandler(account, password);
-                if(typeof(user) == "object" 
-                  && Object.prototype.toString.call(user).toLowerCase() == "[object object]" 
+                if(typeof(user) === "object"
+                  && Object.prototype.toString.call(user).toLowerCase() === "[object object]"
                   && !user.length){
                     ctx[sessionKey] = await Session.create(store, user, sessOpt);
                     const token = await JWT.sign(user,secret,jwtOpt)
@@ -89,8 +89,8 @@ function middleware(opts) {
                 const password = ctx.request.body[passwordKey];
 
                 let user = await registerHandler(account, password);
-                if( typeof(user) == "object" 
-                  && Object.prototype.toString.call(user).toLowerCase() == "[object object]" 
+                if( typeof(user) === "object"
+                  && Object.prototype.toString.call(user).toLowerCase() === "[object object]"
                   && !user.length){
                     ctx[sessionKey] = await Session.create(store, user, sessOpt);
                     const token = await JWT.sign(user,secret,jwtOpt)
