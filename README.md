@@ -65,10 +65,22 @@ Here is the default option values
     accountKey: 'account',
     passwordKey: 'password',
     authHandler: function (account, password) {
-            if (account && password) return true; else return false;
+            		if (account && password) {
+ 				let user = {};
+				user[accountKey] = account;
+				user[passwordKey] = password;
+				return user;
+			}
+			else return false;
         },
     registerHandler: function (account, password) {
-            if (account && password) return true; else return false;
+           		if (account && password) {
+				let user = {};
+				user[accountKey] = account;
+				user[passwordKey] = password;
+				return user;
+			}
+			else return false; 
         }
   },
   session: {

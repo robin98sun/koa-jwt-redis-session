@@ -19,14 +19,13 @@
     "should": "*",
     "supertest": "*",
     "supertest-koa-agent": "*",
-    "debug": "*",
-    "babel": "*",
-    "babel-cli": "*",
+    "babel-cli": "^6.6.5",
     "babel-core": "*",
     "babel-loader": "*",
     "babel-polyfill": "*",
     "babel-preset-es2015": "*",
-    "babel-preset-es2016-node5": "*"
+    "babel-preset-es2016-node5": "*",
+    "babel-plugin-transform-runtime": "*"
   },
   "directories": {},
   "files": [
@@ -61,7 +60,7 @@
   "scripts": {
     "test-dev": "mocha --compilers js:babel-core/register ./src/test.js",
     "test": "mocha ./lib/test.js",
-    "build": "babel --presets es2015,es2016-node5 --out-dir ./lib ./src"
+    "build": "babel --presets es2015,es2016-node5 --plugins transform-runtime --out-dir ./lib ./src"
   },
   "version": "0.0.7"
 }
