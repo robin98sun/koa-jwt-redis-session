@@ -68,7 +68,6 @@ Here is the default option values
             		if (account && password) {
  				let user = {};
 				user[accountKey] = account;
-				user[passwordKey] = password;
 				return user;
 			}
 			else return false;
@@ -77,7 +76,6 @@ Here is the default option values
            		if (account && password) {
 				let user = {};
 				user[accountKey] = account;
-				user[passwordKey] = password;
 				return user;
 			}
 			else return false; 

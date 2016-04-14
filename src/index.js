@@ -27,7 +27,6 @@ function middleware(opts) {
 				if (account && password) {
 					let user = {};
 					user[accountKey] = account;
-					user[passwordKey] = password;
 					return user;
 				}
 				return false;
@@ -36,7 +35,6 @@ function middleware(opts) {
 				if (account && password) {
 					let user = {};
 					user[accountKey] = account;
-					user[passwordKey] = password;
 					return user;
 				}
 				return false;
