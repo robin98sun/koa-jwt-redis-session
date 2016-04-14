@@ -62,6 +62,6 @@
     "test": "mocha ./lib/test.js",
     "build": "babel --presets es2015,es2016-node5 --plugins transform-runtime --out-dir ./lib ./src"
   },
-  "version": "0.0.7"
+  "version": "0.0.8"
 }
 
