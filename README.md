@@ -100,7 +100,7 @@ Action flow
 
 1. Anonymous client post JSON user credential information `{ account: "...", password: "..." }` to `/register` to register an account, 
 2. or post to `/authorize` to get authorization
-3. Client get token in JSON like `{ token: "..." }`, or an `401` error if not authorized
+3. Client get token in JSON like `{ token: "...", expiresIn: 3600 }`, or an `401` error if not authorized
 4. From then on, client send every request by the http header: `Authorization: Bearer <token>`,
 5. or client would get `401` error if not authorized or *token expired*
 6. On the server side, afterward middlewares can operate `ctx.session` as will
