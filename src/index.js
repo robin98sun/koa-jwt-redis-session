@@ -190,8 +190,12 @@ class Session {
         return !!this.length;
     }
 
-    static generateSessionId (){
-        return uid(24);
+    static generateSessionId (header){
+        if(!header){
+            return uid(24);
+        }else{
+            return header+":"+uid(24);
+        }
     }
 
     /**
@@ -208,10 +212,10 @@ class Session {
         if(!instance[options.sidKey]) {
             debug('Creating session')
             // Creating
-            let sid = Session.generateSessionId();
+            let sid = Session.generateSessionId(options.sidKey);
             while (await store.exists(sid)){
                 debug('sid', sid, 'exists')
-                sid = Session.generateSessionId();
+                sid = Session.generateSessionId(options.sidKey);
             }
             debug('new sid:', sid)
             user[options.sidKey] = sid;
@@ -269,11 +273,11 @@ class Store {
         if(this.type === 'redis'){
             if(!key || !this.client || !this.client.get) return null;
             const client = this.client;
-            let redisValue = await co(function*(){
+            let value = await co(function*(){
                 return yield client.get(key);
             })
-            if(redisValue && typeof redisValue === 'string') return JSON.parse(redisValue);
-            else return redisValue;
+            if(value && typeof value === 'string') return JSON.parse(value);
+            else return value;
         }
     }
 }
