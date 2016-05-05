@@ -53,7 +53,7 @@ function middleware(opts) {
     // Utilities
     function sendToken(ctx, token){
         if(contentType.toLowerCase() === 'application/json')
-            ctx.body = {token};
+            ctx.body = {token, expiresIn};
         else ctx.body = token;
     }
 
