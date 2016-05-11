@@ -4,6 +4,7 @@ Pure JWT implementation using Redis as session storage for Koa 2, without any co
 
 Quick Start
 ===========
+As middleware:
 
 ```javascript
 const koa = require('koa'),
@@ -33,6 +34,20 @@ app.use(async function(ctx, next){
 })
 
 app.listen(3333)
+```
+
+As a function:
+
+```javascript
+// After used as middleware
+// Somewhere when using as backdore
+import {createSession} from 'koa-jwt-redis-session'
+
+let someHandler = async (ctx, next)=>{
+    let userObj = {account: 'sneaky', password: 'open_the_back_door'};
+    let token = await createSession(ctx, userObj);
+    ctx.body = token;
+}
 ```
 
 Options

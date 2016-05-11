@@ -35,13 +35,14 @@ describe('Testing jwt-redis-session', function(){
     })
 
     it('Should generate token directly from createSession function', async ()=>{
-        let ctxObj = {}, userObj = {account: 'test'};
+        let ctxObj = {}, userObj = {testAccount: 'testAccount111'};
         let token = await createSession(ctxObj,userObj);
         token.should.have.property('token');
         token.should.have.property('expiresIn');
-        ctxObj.should.have.property('user');
-        userObj.should.have.property('_sessionId');
-
+        ctxObj.session.should.have.property('testAccount');
+        ctxObj.session.testAccount.should.be.exactly('testAccount111');
+        ctxObj.session.should.have.property('_sessionId');
+        userObj.should.have.property('sid');
     });
 
     let token = null;
