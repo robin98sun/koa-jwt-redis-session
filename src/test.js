@@ -6,6 +6,7 @@ import koa from 'koa'
 import convert from 'koa-convert'
 import bodyParser from 'koa-bodyparser'
 import session from './index.js'
+import {createSession} from './index.js'
 
 describe('Testing jwt-redis-session', function(){
     const app = new koa();
@@ -32,6 +33,15 @@ describe('Testing jwt-redis-session', function(){
             await next();
         }
     })
+
+    it('Should generate token directly from createSession function', async ()=>{
+        let ctxObj = {}, userObj = {account: 'test'};
+        let token = await createSession(ctxObj,userObj);
+        should(token).have.property('token');
+        ctxObj.should.have.property('user');
+        userObj.should.have.property('_sessionId');
+
+    });
 
     let token = null;
     it('Should get authorization token', function(done){

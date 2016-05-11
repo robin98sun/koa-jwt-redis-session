@@ -10,45 +10,67 @@ import co from 'co'
 const DEBUG_LOG_HEADER = '[koa-jwt-redis-session]'
 const EXPIRES_IN_SECONDS = 60 * 60
 
-function middleware(opts) {
+// Options
+// JWT Options
+let jwtOptions , contentType , charset, secret, authPath, registerPath, expiresIn, accountKey;
+let passwordKey, authHandler, registerHandler, jwtOpt;
+// Session
+let sessionOptions, sessionKey, sidKey, sessOpt;
+// Redis Options
+let redisOptions, redisStore, store;
+
+function parseOptions(opts) {
     // Options
     const options = opts || {}
     // JWT Options
-    const jwtOptions = options.jwt || {}
-    const contentType = jwtOptions.contentType || 'application/json'
-    const charset = jwtOptions.charset || 'utf-8'
-    const secret = jwtOptions.secret || 'koa-jwt-redis-session' + new Date().getTime()
-    const authPath = jwtOptions.authPath || '/authorize';
-    const registerPath = jwtOptions.registerPath || '/register';
-    const expiresIn = jwtOptions.expiresIn || EXPIRES_IN_SECONDS;
-    const accountKey = jwtOptions.accountKey || 'account';
-    const passwordKey = jwtOptions.passwordKey || 'password';
-    const authHandler = jwtOptions.authHandler || function (account, password) {
-				if (account && password) {
-					let user = {};
-					user[accountKey] = account;
-					return user;
-				}
-				return false;
-		}
-    const registerHandler = jwtOptions.registerHandler || function (account, password) {
-				if (account && password) {
-					let user = {};
-					user[accountKey] = account;
-					return user;
-				}
-				return false;
-    }
-    const jwtOpt = {expiresIn};
+    jwtOptions = options.jwt || {}
+    contentType = jwtOptions.contentType || 'application/json'
+    charset = jwtOptions.charset || 'utf-8'
+    secret = jwtOptions.secret || 'koa-jwt-redis-session' + new Date().getTime()
+    authPath = jwtOptions.authPath || '/authorize';
+    registerPath = jwtOptions.registerPath || '/register';
+    expiresIn = jwtOptions.expiresIn || EXPIRES_IN_SECONDS;
+    accountKey = jwtOptions.accountKey || 'account';
+    passwordKey = jwtOptions.passwordKey || 'password';
+    authHandler = jwtOptions.authHandler || function (account, password) {
+            if (account && password) {
+                let user = {};
+                user[accountKey] = account;
+                return user;
+            }
+            return false;
+        }
+    registerHandler = jwtOptions.registerHandler || function (account, password) {
+            if (account && password) {
+                let user = {};
+                user[accountKey] = account;
+                return user;
+            }
+            return false;
+        }
+    jwtOpt = {expiresIn};
     // Session
-    const sessionOptions = options.session || {}
-    const sessionKey = sessionOptions.sessionKey || 'session';
-    const sidKey = sessionOptions.sidKey || 'koa:sess';
-    const sessOpt = {sidKey};
+    sessionOptions = options.session || {}
+    sessionKey = sessionOptions.sessionKey || 'session';
+    sidKey = sessionOptions.sidKey || 'koa:sess';
+    sessOpt = {sidKey};
     // Redis Options
-    const redisOptions = options.redis || {}
-    const redisStore = new RedisStore(redisOptions);
-    const store = redisStore;
+    redisOptions = options.redis || {}
+    redisStore = new RedisStore(redisOptions);
+    store = redisStore;
+}
+
+let createSession = async (ctx, user)=>{
+    ctx[sessionKey] = await Session.create(store, user, sessOpt);
+    const token = await JWT.sign(user,secret,jwtOpt)
+    debug('Generated token:', token)
+    return token;
+}
+
+export {createSession};
+
+function middleware(opts) {
+    parseOptions(opts);
 
     // Utilities
     function sendToken(ctx, token){
@@ -71,9 +93,12 @@ function middleware(opts) {
                 let user = await authHandler(account, password);
                 if( (typeof user === 'boolean'  && user ) || 
                     Object.prototype.toString.call(user).toLowerCase() === "[object object]"){
-                    ctx[sessionKey] = await Session.create(store, user, sessOpt);
-                    const token = await JWT.sign(user,secret,jwtOpt)
-                    debug('Generated token:', token)
+                    let userObj;
+                    if(typeof user === 'boolean'){
+                        userObj = {};
+                        userObj[accountKey] = account;
+                    }else userObj = user;
+                    let token = await createSession(ctx, userObj)
                     sendToken(ctx, token);
                 }else{
                     ctx.throw(401, 'Authorization failed');
@@ -89,9 +114,12 @@ function middleware(opts) {
                 if( (typeof user === 'boolean'  && user ) || 
                     Object.prototype.toString.call(user).toLowerCase() === "[object object]"
                     ){
-                    ctx[sessionKey] = await Session.create(store, user, sessOpt);
-                    const token = await JWT.sign(user,secret,jwtOpt)
-                    debug('Generated token:', token)
+                    let userObj;
+                    if(typeof user === 'boolean'){
+                        userObj = {};
+                        userObj[accountKey] = account;
+                    }else userObj = user;
+                    let token = await createSession(ctx, userObj)
                     sendToken(ctx, token);
                 }else{
                     ctx.throw(401, 'Register failed')
@@ -281,6 +309,7 @@ class Store {
         }
     }
 }
+
 // Redis store
 class RedisStore extends  Store{
     constructor (opts){
