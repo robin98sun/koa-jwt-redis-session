@@ -37,7 +37,8 @@ describe('Testing jwt-redis-session', function(){
     it('Should generate token directly from createSession function', async ()=>{
         let ctxObj = {}, userObj = {account: 'test'};
         let token = await createSession(ctxObj,userObj);
-        should(token).have.property('token');
+        token.should.have.property('token');
+        token.should.have.property('expiresIn');
         ctxObj.should.have.property('user');
         userObj.should.have.property('_sessionId');
 

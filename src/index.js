@@ -64,7 +64,7 @@ let createSession = async (ctx, user)=>{
     ctx[sessionKey] = await Session.create(store, user, sessOpt);
     const token = await JWT.sign(user,secret,jwtOpt)
     debug('Generated token:', token)
-    return token;
+    return {token, expiresIn};
 }
 
 export {createSession};
@@ -75,8 +75,8 @@ function middleware(opts) {
     // Utilities
     function sendToken(ctx, token){
         if(contentType.toLowerCase() === 'application/json')
-            ctx.body = {token, expiresIn};
-        else ctx.body = token;
+            ctx.body = token;
+        else ctx.body = token.token;
     }
 
     // Authorization by JWT
