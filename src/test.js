@@ -6,7 +6,7 @@ import koa from 'koa'
 import convert from 'koa-convert'
 import bodyParser from 'koa-bodyparser'
 import session from './index.js'
-import {createSession} from './index.js'
+import {createSession, authoriseRequest} from './index.js'
 
 describe('Testing jwt-redis-session', function(){
     const app = new koa();
@@ -34,9 +34,11 @@ describe('Testing jwt-redis-session', function(){
         }
     })
 
+    let token, ctxObj, userObj;
+
     it('Should generate token directly from createSession function', async ()=>{
-        let ctxObj = {}, userObj = {testAccount: 'testAccount111'};
-        let token = await createSession(ctxObj,userObj);
+        ctxObj = {}, userObj = {testAccount: 'testAccount111'};
+        token = await createSession(ctxObj,userObj);
         token.should.have.property('token');
         token.should.have.property('expiresIn');
         ctxObj.session.should.have.property('testAccount');
@@ -45,7 +47,16 @@ describe('Testing jwt-redis-session', function(){
         userObj.should.have.property('sid');
     });
 
-    let token = null;
+    it('Should authorise the token generated just now', async ()=>{
+        ctxObj.header = {authorization: "Bearer " + token.token}
+        userObj = null;
+        console.log('ctx:', ctxObj)
+        userObj = await authoriseRequest(ctxObj);
+        console.log('userObj:',userObj)
+        userObj.should.have.property('sid');
+    });
+
+    token = null;
     it('Should get authorization token', function(done){
         request(app).post('/authorize')
             .send({account: 'test', password: 'test'})

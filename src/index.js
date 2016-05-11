@@ -13,7 +13,7 @@ const EXPIRES_IN_SECONDS = 60 * 60
 // Options
 // JWT Options
 let jwtOptions , contentType , charset, secret, authPath, registerPath, expiresIn, accountKey;
-let passwordKey, authHandler, registerHandler, jwtOpt;
+let passwordKey, authHandler, registerHandler, jwtOpt, refreshTokenPath;
 // Session
 let sessionOptions, sessionKey, sidKey, sessOpt;
 // Redis Options
@@ -29,6 +29,7 @@ function parseOptions(opts) {
     secret = jwtOptions.secret || 'koa-jwt-redis-session' + new Date().getTime()
     authPath = jwtOptions.authPath || '/authorize';
     registerPath = jwtOptions.registerPath || '/register';
+    refreshTokenPath = jwtOptions.refreshTokenPath || '/refreshToken';
     expiresIn = jwtOptions.expiresIn || EXPIRES_IN_SECONDS;
     accountKey = jwtOptions.accountKey || 'account';
     passwordKey = jwtOptions.passwordKey || 'password';
@@ -61,13 +62,24 @@ function parseOptions(opts) {
 }
 
 let createSession = async (ctx, user)=>{
-    ctx[sessionKey] = await Session.create(store, user, sessOpt);
+    let sess = await Session.create(store, user, sessOpt);
     const token = await JWT.sign(user,secret,jwtOpt)
+    ctx[sessionKey] = sess;
     debug('Generated token:', token)
     return {token, expiresIn};
 }
 
-export {createSession};
+let authoriseRequest = async (ctx) => {
+    //if(ctx.header.authorization){
+    if(ctx && ctx.header && ctx.header.authorization) {
+        const authComponents = ctx.header.authorization.split(' ');
+        if (authComponents.length === 2 && authComponents[0] === 'Bearer') {
+            let user = await JWT.verify(authComponents[1], secret, jwtOpt)
+            return user;
+        }
+    }
+    return null;
+}
 
 function middleware(opts) {
     parseOptions(opts);
@@ -83,8 +95,17 @@ function middleware(opts) {
     return async function (ctx, next) {
         try {
             ctx.type = contentType + ';' + 'charset=' + charset;
+            if (ctx.path === refreshTokenPath && ctx.method.toUpperCase() === 'POST'
+            ) {
+                let user = await authoriseRequest(ctx);
+                if(user){
+                    delete user.iat, user.exp;
+                    let token = await createSession(ctx, user);
+                    debug('Refreshed token:', token, 'user:', user)
+                    sendToken(ctx, token);
+                }
             // SignIn
-            if (ctx.path === authPath && ctx.method.toUpperCase() === 'POST'
+            }else if (ctx.path === authPath && ctx.method.toUpperCase() === 'POST'
                 && ctx.request.body[accountKey] && ctx.request.body[passwordKey]
             ) {
                 const account = ctx.request.body[accountKey];
@@ -125,21 +146,15 @@ function middleware(opts) {
                     ctx.throw(401, 'Register failed')
                 }
             }else {
-                if(ctx.header.authorization){
-                    const authComponents = ctx.header.authorization.split(' ');
-                    if(authComponents.length === 2 && authComponents[0] === 'Bearer'){
-                        let user = JWT.verify(authComponents[1],secret,jwtOpt)
-                        if(user){
-                            debug('Authorized user:', user)
-
-                            ctx[sessionKey] = await Session.create(store, user, sessOpt);
-                            await next();
-                            if(ctx[sessionKey] == undefined || ctx[sessionKey] === false){
-                                // session is destroyed in the business
-                            }else{
-                                await ctx[sessionKey].save(store);
-                            }
-                        }
+                let user = await authoriseRequest(ctx)
+                if(user){
+                    debug('Authorized user:', user)
+                    ctx[sessionKey] = await Session.create(store, user, sessOpt);
+                    await next();
+                    if(ctx[sessionKey] == undefined || ctx[sessionKey] === false){
+                        // session is destroyed in the business
+                    }else{
+                        await ctx[sessionKey].save(store);
                     }
                 }
             }
@@ -151,6 +166,7 @@ function middleware(opts) {
     };
 }
 export default middleware;
+export {createSession, authoriseRequest};
 
 // Session Model
 class Session {
@@ -235,17 +251,17 @@ class Session {
         let instance = user || {};
         let options = opts || {
                 sidKey: 'sid'
-            }
-
+            };
+        debug('User for creating session:', instance);
         if(!instance[options.sidKey]) {
-            debug('Creating session')
+            debug('Creating session');
             // Creating
             let sid = Session.generateSessionId(options.sidKey);
             while (await store.exists(sid)){
-                debug('sid', sid, 'exists')
+                debug('sid', sid, 'exists');
                 sid = Session.generateSessionId(options.sidKey);
             }
-            debug('new sid:', sid)
+            debug('new sid:', sid);
             user[options.sidKey] = sid;
             instance[options.sidKey] = sid;
             let session = new Session(instance);
@@ -281,7 +297,7 @@ class Store {
             if (!key || !this.client || !this.client.exists) return exists;
             const client = this.client;
             return await co(function*(){
-                return yield  client.exists(key);
+                return yield client.exists(key);
             })
         }else{
             return exists;
@@ -291,8 +307,8 @@ class Store {
     async set(key, value){
         if(this.type === 'redis'){
             if(!key || !this.client || !this.client.set) return;
-            let redisValue = (typeof value === 'object') ? JSON.stringify(value): value;
-            await this.client.set(key, redisValue);
+            let storedValue = (typeof value === 'object') ? JSON.stringify(value): value;
+            await this.client.set(key, storedValue);
             await this.client.ttl(key)
         }
     }
@@ -337,7 +353,7 @@ class RedisStore extends  Store{
 
         client.get = thunkify(client.get);
         client.exists = thunkify(client.exists);
-        client.ttl = ttl ? function expire(key) { client.expire(key, ttl); }: function () {};
+        client.ttl = ttl ? (key)=>{ client.expire(key, ttl); } : ()=>{};
 
         client.on('connect', function () {
             debug('redis is connecting');

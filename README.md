@@ -41,13 +41,25 @@ As a function:
 ```javascript
 // After used as middleware
 // Somewhere when using as backdore
-import {createSession} from 'koa-jwt-redis-session'
+import {createSession, authoriseRequest} from 'koa-jwt-redis-session'
 
-let someHandler = async (ctx, next)=>{
+let openDoorHandler = async (ctx, next)=>{
     let userObj = {account: 'sneaky', password: 'open_the_back_door'};
     let token = await createSession(ctx, userObj);
     ctx.body = token;
+    // Token is in JSON format: {token: ..... , expiresIn: 3600}
+    // expiresIn is the expire time in seconds, default is 3600
 }
+
+let guardHandler = async (ctx, next)=>{
+    let user = await authoriseRequest(ctx);
+    if( user != undefined){
+        ctx.body = user;
+    }else{
+        ctx.throw(new Error('Unauthorized');
+    }
+}
+
 ```
 
 Options
@@ -76,6 +88,7 @@ Here is the default option values
     secret: 'koa-jwt-redis-session' + new Date().getTime(),
     authPath: '/authorize',
     registerPath: '/register',
+    refreshTokenPath: '/refreshToken',
     expiresIn: 3600,
     accountKey: 'account',
     passwordKey: 'password',
@@ -120,4 +133,6 @@ Action flow
 5. or client would get `401` error if not authorized or *token expired*
 6. On the server side, afterward middlewares can operate `ctx.session` as will
 
+
 Enjoy!
+======
