@@ -368,10 +368,6 @@ class RedisStore extends  Store{
 
         client.on('ready', function () {
             debug('redis ready');
-            debug('redis host: %s', host);
-            debug('redis port: %s', port);
-            debug('redis parser: %s', client.reply_parser.name);
-            debug('redis server info: %j', client.server_info);
         });
 
         client.on('reconnect', function () {
