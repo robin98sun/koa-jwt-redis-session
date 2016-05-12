@@ -1,7 +1,6 @@
 'use strict'
 let debug = require('debug')('koa-jwt-redis-session')
 
-//import redis from 'redis'
 import redis from 'ioredis'
 import JWT from 'jsonwebtoken'
 import thunkify from 'thunkify'
