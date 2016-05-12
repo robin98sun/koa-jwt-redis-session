@@ -297,12 +297,11 @@ class Store {
     async exists(key){
         let exists = true;
         if(this.type === 'redis') {
-            if (!key || !this.client ) return exists;
+            if (!key || !this.client || !this.client.exists) return exists;
             const client = this.client;
-            let value =  await co(function*(){
-                return yield client.get(key);
+            return await co(function*(){
+                return yield client.exists(key);
             })
-            if(value) return true; else return false;
         }else{
             return exists;
         }
@@ -336,18 +335,8 @@ class RedisStore extends  Store{
         super(opts)
         this.type = 'redis'
         let redisOptions = opts || {}
-        // Check redis type, if is using cluster , then use ioredis
-        this.isUsingCluster = false;
-        if (opts && opts.sentinels && opts.name){
-            // is using redis cluster
-            // but may need improvement
-            this.isUsingCluster = true;
-        }
-        const port = this.port = redisOptions.port || 6379
-        const host = this.host = redisOptions.host || '127.0.0.1'
-        const db = this.db = redisOptions.db || 0
+        const db = redisOptions.db || 0
         const ttl = this.ttl = redisOptions.ttl || expiresIn || EXPIRES_IN_SECONDS
-        const options = this.options = redisOptions.options || {}
 
         //redis client for session
         this.client = new redis(redisOptions)
@@ -359,7 +348,7 @@ class RedisStore extends  Store{
         });
 
         client.get = thunkify(client.get);
-        //client.exists = thunkify(client.exists);
+        client.exists = thunkify(client.exists);
         client.ttl = ttl ? (key)=>{ client.expire(key, ttl); } : ()=>{};
 
         client.on('connect', function () {
