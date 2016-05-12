@@ -50,9 +50,7 @@ describe('Testing jwt-redis-session', function(){
     it('Should authorise the token generated just now', async ()=>{
         ctxObj.header = {authorization: "Bearer " + token.token}
         userObj = null;
-        console.log('ctx:', ctxObj)
         userObj = await authoriseRequest(ctxObj);
-        console.log('userObj:',userObj)
         userObj.should.have.property('sid');
     });
 

@@ -103,6 +103,8 @@ function middleware(opts) {
                     let token = await createSession(ctx, user);
                     debug('Refreshed token:', token, 'user:', user)
                     sendToken(ctx, token);
+                }else{
+                    ctx.throw(401, 'Authorization failed')
                 }
             // SignIn
             }else if (ctx.path === authPath && ctx.method.toUpperCase() === 'POST'
