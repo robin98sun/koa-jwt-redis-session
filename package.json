@@ -8,7 +8,8 @@
     "thunkify": "^2.1.2",
     "uid2": "^0.0.3",
     "jsonwebtoken": "^5.7.0",
-    "co": "^4.6.0"
+    "co": "^4.6.0",
+    "ioredis": "^1.15.1"
   },
   "description": "Pure JWT implementation using Redis as session storage for Koa 2, without any cookies",
   "devDependencies": {
@@ -63,6 +64,6 @@
     "test": "mocha ./lib/test.js",
     "build": "babel --presets es2015,es2016-node5 --plugins transform-class-properties,transform-runtime --out-dir ./lib ./src"
   },
-  "version": "0.0.16"
+  "version": "0.0.17"
 }
 
