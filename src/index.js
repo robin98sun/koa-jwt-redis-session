@@ -15,7 +15,7 @@ const EXPIRES_IN_SECONDS = 60 * 60
 let jwtOptions , contentType , charset, secret, authPath, registerPath, expiresIn, accountKey;
 let passwordKey, authHandler, registerHandler, jwtOpt, refreshTokenPath;
 // Session
-let sessionOptions, sessionKey, sidKey, sessOpt;
+let sessionKey, sidKey, sessOpt;
 // Redis Options
 let redisOptions, redisStore, store;
 
@@ -52,7 +52,7 @@ function parseOptions(opts) {
         }
     jwtOpt = {expiresIn};
     // Session
-    sessionOptions = options.session || {}
+    let sessionOptions = options.session || {}
     sessionKey = sessionOptions.sessionKey || 'session';
     sidKey = sessionOptions.sidKey || 'koa:sess';
     sessOpt = {sidKey};
