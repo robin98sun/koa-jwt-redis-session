@@ -22,6 +22,7 @@ let redisOptions, redisStore, store;
 function parseOptions(opts) {
     // Options
     const options = opts || {}
+    debug('Parsing options:', options);
     // JWT Options
     jwtOptions = options.jwt || {}
     contentType = jwtOptions.contentType || 'application/json'
@@ -346,7 +347,7 @@ class RedisStore extends  Store{
         this.type = 'redis'
         let redisOptions = opts || {}
         debug('Redis options:', redisOptions);
-        
+
         const db = redisOptions.db || 0
         const ttl = this.ttl = redisOptions.ttl || expiresIn || EXPIRES_IN_SECONDS
 
