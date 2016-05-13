@@ -56,7 +56,7 @@ let guardHandler = async (ctx, next)=>{
     if( user != undefined){
         ctx.body = user;
     }else{
-        ctx.throw(new Error('Unauthorized');
+        ctx.throw(new Error('Unauthorized'));
     }
 }
 
