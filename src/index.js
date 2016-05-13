@@ -255,6 +255,7 @@ class Session {
                 sidKey: 'sid'
             };
         debug('User for creating session:', instance);
+        debug('Session options for creating session:', opts);
         if(!instance[options.sidKey]) {
             debug('Creating session');
             // Creating
@@ -298,9 +299,19 @@ class Store {
         if(this.type === 'redis') {
             if (!key || !this.client || !this.client.exists) return exists;
             const client = this.client;
-            return await co(function*(){
-                return yield client.exists(key);
-            })
+            try {
+                return await co(function*() {
+                    return yield client.exists(key);
+                })
+            }catch (ex){
+                // under some condition, it may not support exists command, wield
+                debug('Error when trying invoke "exists" of redis driver:', ex);
+                let value = await co(function*(){
+                    return yield client.get(key);
+                })
+                if(value) return true;
+                else return false;
+            }
         }else{
             return exists;
         }
