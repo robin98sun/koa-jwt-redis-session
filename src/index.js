@@ -345,6 +345,8 @@ class RedisStore extends  Store{
         super(opts)
         this.type = 'redis'
         let redisOptions = opts || {}
+        debug('Redis options:', redisOptions);
+        
         const db = redisOptions.db || 0
         const ttl = this.ttl = redisOptions.ttl || expiresIn || EXPIRES_IN_SECONDS
 
