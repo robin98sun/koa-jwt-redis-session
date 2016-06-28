@@ -105,7 +105,8 @@ function middleware(opts) {
                     debug('Refreshed token:', token, 'user:', user)
                     sendToken(ctx, token);
                 }else{
-                    ctx.throw(401, 'Authorization failed')
+                    ctx.body= 'Authorization failed';
+                    ctx.status = 401;
                 }
             // SignIn
             }else if (ctx.path === authPath && ctx.method.toUpperCase() === 'POST'
@@ -125,7 +126,8 @@ function middleware(opts) {
                     let token = await createSession(ctx, userObj)
                     sendToken(ctx, token);
                 }else{
-                    ctx.throw(401, 'Authorization failed');
+                    ctx.body= 'Authorization failed';
+                    ctx.status = 401;
                 }
             // Register
             } else if (ctx.path === registerPath && ctx.method.toUpperCase() === 'POST'
@@ -146,7 +148,8 @@ function middleware(opts) {
                     let token = await createSession(ctx, userObj)
                     sendToken(ctx, token);
                 }else{
-                    ctx.throw(401, 'Register failed')
+                    ctx.body= 'Authorization failed';
+                    ctx.status = 401;
                 }
             }else {
                 let user = await authoriseRequest(ctx)
@@ -163,7 +166,7 @@ function middleware(opts) {
             }
         } catch (ex) {
             console.error(DEBUG_LOG_HEADER, '[ERROR] catch something wrong:', ex)
-            ctx.response.status = 401;
+            ctx.response.status = 500;
             if(ex.message) ctx.body = ex.message;
         }
     };

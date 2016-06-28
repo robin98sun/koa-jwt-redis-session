@@ -32,7 +32,7 @@ describe('Testing jwt-redis-session', function(){
         }else{
             await next();
         }
-    })
+    });
 
     let token, ctxObj, userObj;
 
