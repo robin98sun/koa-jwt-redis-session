@@ -165,9 +165,13 @@ function middleware(opts) {
                 }
             }
         } catch (ex) {
-            console.error(DEBUG_LOG_HEADER, '[ERROR] catch something wrong:', ex)
-            ctx.response.status = 500;
-            if(ex.message) ctx.body = ex.message;
+            if(ex.name !== 'UnauthorizedError' || ex.name !== 'JsonWebTokenError' ) {
+                debug(DEBUG_LOG_HEADER, '[ERROR] catch something wrong:', ex)
+                ctx.status = 500;
+                if (ex.message && !ctx.body) ctx.body = ex.message;
+            }else{
+                ctx.status = 401;
+            }
         }
     };
 }
