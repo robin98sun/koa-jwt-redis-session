@@ -105,7 +105,7 @@ function middleware(opts) {
                     debug('Refreshed token:', token, 'user:', user)
                     sendToken(ctx, token);
                 }else{
-                    ctx.body= 'Authorization failed';
+                    // ctx.body= 'Authorization failed';
                     ctx.status = 401;
                 }
             // SignIn
@@ -126,7 +126,7 @@ function middleware(opts) {
                     let token = await createSession(ctx, userObj)
                     sendToken(ctx, token);
                 }else{
-                    ctx.body= 'Authorization failed';
+                    // ctx.body= 'Authorization failed';
                     ctx.status = 401;
                 }
             // Register
@@ -148,7 +148,7 @@ function middleware(opts) {
                     let token = await createSession(ctx, userObj)
                     sendToken(ctx, token);
                 }else{
-                    ctx.body= 'Authorization failed';
+                    // ctx.body= 'Authorization failed';
                     ctx.status = 401;
                 }
             }else {
