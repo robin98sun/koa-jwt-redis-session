@@ -1,6 +1,6 @@
 {
   "bugs": {
-    "url": "https://github.com/lyalls/koa-jwt-redis-session/issues"
+    "url": "https://github.com/mrsunlin/koa-jwt-redis-session/issues"
   },
   "dependencies": {
     "debug": "*",
@@ -35,7 +35,7 @@
     "lib",
     "src"
   ],
-  "homepage": "https://github.com/lyalls/koa-jwt-redis-session",
+  "homepage": "https://github.com/mrsunlin/koa-jwt-redis-session",
   "keywords": [
     "koa",
     "middleware",
@@ -49,21 +49,21 @@
   "license": "MIT",
   "maintainers": [
     {
-      "name": "Lyall Sun",
-      "email": "lyall.sunlin@gmail.com"
+      "name": "Lin Sun",
+      "email": "mr.sun.lin@gmail.com"
     }
   ],
   "name": "koa-jwt-redis-session",
   "optionalDependencies": {},
   "repository": {
     "type": "git",
-    "url": "git@github.com:lyalls/koa-jwt-redis-session.git"
+    "url": "git@github.com:mrsunlin/koa-jwt-redis-session.git"
   },
   "scripts": {
     "test-dev": "mocha --compilers js:babel-core/register ./src/test.js",
     "test": "mocha ./lib/test.js",
     "build": "babel --presets es2015,es2016-node5 --plugins transform-class-properties,transform-runtime --out-dir ./lib ./src"
   },
-  "version": "0.0.27"
+  "version": "0.0.28"
 }
 
